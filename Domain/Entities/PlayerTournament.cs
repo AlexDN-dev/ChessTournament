@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DAL.Entities;
+namespace Domain.Entities;
 
-public partial class PlayerTournament
+public class PlayerTournament
 {
     public Guid TournamentId { get; set; }
 

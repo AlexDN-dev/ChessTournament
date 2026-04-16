@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DAL.Entities;
+namespace Domain.Entities;
 
-public partial class Category
+public class Category
 {
     public Guid Id { get; set; }
 
