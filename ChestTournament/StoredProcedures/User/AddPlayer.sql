@@ -13,7 +13,7 @@ BEGIN
 
             IF JSON_VALUE(@Json, '$.Username') IS NULL
                 OR JSON_VALUE(@Json, '$.Email') IS NULL
-                OR JSON_VALUE(@Json, '$.hashPassword') IS NULL
+                OR JSON_VALUE(@Json, '$.HashPassword') IS NULL
                 OR JSON_VALUE(@Json, '$.Birthday') IS NULL
                 OR JSON_VALUE(@Json, '$.Gender') IS NULL
                 BEGIN
@@ -41,8 +41,8 @@ BEGIN
                     RAISERROR('La date de naissance doit être dans le passé.', 16, 1);
                 END
 
-            INSERT INTO Players (id, Username, Email, hashPassword, Birthday, Gender)
-            SELECT  NEWSEQUENTIALID(), Username, Email, hashPassword, Birthday, Gender
+            INSERT INTO Players (Id, Username, Email, hashPassword, Birthday, Gender)
+            SELECT  NEWID(), Username, Email, hashPassword, Birthday, Gender
             FROM OPENJSON(@Json)
                           WITH (
                               Username     NVARCHAR(50),

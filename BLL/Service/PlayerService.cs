@@ -1,4 +1,4 @@
-﻿using BLL.DTOs;
+﻿using System.Text.RegularExpressions;
 using BLL.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -14,24 +14,50 @@ public class PlayerService : IPlayerService
         _repository = repository;
     }
     
-    public async Task<IEnumerable<PlayerDto>> GetAllAsync()
+    public async Task<IEnumerable<Player>> GetAllAsync()
     {
         var players = await _repository.GetAllAsync();
-        return players.Select(ToDto);
+        return players;
     }
 
-    public async Task<PlayerDto> GetPlayerByUsernameAsync(string username)
+    public async Task<Player> GetPlayerByUsernameAsync(string username)
     {
         var player = await _repository.GetPlayerByUsernameAsync(username);
         if (player is null)
         {
-            throw new KeyNotFoundException("Aucun joueur trouvé avec ce pseudo.");
+            throw new KeyNotFoundException("Aucun joueur trouvé avec cet email.");
         }
 
-        return ToDto(player);
+        return player;
     }
 
-    private static PlayerDto ToDto(Player p)
-        => new(p.Id, p.Username, p.Email, p.Birthday, p.Gender, p.Elo);
+    public async Task<Player> CreatePlayerAsync(Player player)
+    {
+        var isExisting = await _repository.IfPlayerExistAsync(player.Email, player.Username);
+        if (isExisting != null)
+        {
+            if (isExisting.Username == player.Username)
+                throw new Exception("Username déjà utilisé");
 
+            if (isExisting.Email == player.Email)
+                throw new Exception("Email déjà utilisé");
+        }
+
+        if (player.Gender != "Homme" && player.Gender != "Femme")
+        {
+            throw new Exception("Merci de rentrer un genre valide");
+        }
+
+        
+        var regex = new Regex(@"^(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$");
+        bool isValidPassword = regex.IsMatch(player.HashPassword);
+        if (!isValidPassword)
+        {
+            throw new Exception("Le mot de passe doit avoir au moins 8 caractères, un chiffre et un caractère spécial");
+        }
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(player.HashPassword);
+        player.HashPassword = hashedPassword;
+        var p = await _repository.CreatePlayerAsync(player);
+        return p;
+    }
 }
