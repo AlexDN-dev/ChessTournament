@@ -25,9 +25,11 @@ builder.Services.AddDbContext<ChessTournamentContext>(options =>
 
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITournamentService, TournamentService>();
 
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
 
 var app = builder.Build();
 

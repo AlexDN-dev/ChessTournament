@@ -28,5 +28,5 @@ public record CreatePlayerDto(
     DateTime BirthDay,
     [Required (ErrorMessage = "Un genre est requis.")]
     string Gender,
-    int Elo
+    int Elo = 1200
     );
