@@ -6,4 +6,7 @@
         <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
         <ModelCollation>1033, CI</ModelCollation>
     </PropertyGroup>
+    <ItemGroup>
+      <Folder Include="StoredProcedures\Tournament\" />
+    </ItemGroup>
 </Project>
