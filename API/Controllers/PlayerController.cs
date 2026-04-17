@@ -53,7 +53,8 @@ public class PlayerController : ControllerBase
             Email = p.Email,
             HashPassword = p.Password,
             Birthday = p.BirthDay,
-            Gender = p.Gender
+            Gender = p.Gender,
+            Elo = p.Elo
         };
     }
 }
