@@ -83,4 +83,11 @@ public class TournamentController : ControllerBase
         await _service.UnsubscribePlayerFromTournamentAsync(playerUsername, tournamentId);
         return Ok("Le joueur à bien été désinscrit du tournoi.");
     }
+
+    [HttpPut("start-tournament")]
+    public async Task<ActionResult> StartTournament(Guid tournamentId)
+    {
+        await _service.StartTournamentAsync(tournamentId);
+        return Ok("Le tournoi a bien débuté.");
+    }
 }

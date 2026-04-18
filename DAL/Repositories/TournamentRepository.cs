@@ -3,6 +3,7 @@ using DAL.Context;
 using DAL.Interfaces;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Enum;
 using Domain.Filters;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -53,7 +54,11 @@ public class TournamentRepository : ITournamentRepository
         return await _context.Tournaments
             .Include(t => t.Categories)
             .Include(t => t.PlayerTournaments)
-            .ThenInclude(pt => pt.Player)
+                .ThenInclude(pt => pt.Player)
+            .Include(t => t.EncounterTournaments)
+                .ThenInclude(e => e.Player1Navigation)
+            .Include(t => t.EncounterTournaments)
+                .ThenInclude(e => e.Player2Navigation)
             .AsNoTracking()
             .FirstOrDefaultAsync(t => t.Id == id);
     }
@@ -92,6 +97,17 @@ public class TournamentRepository : ITournamentRepository
      public async Task UnsubscribePlayerFromTournamentAsync(PlayerTournament pt)
     {
         _context.PlayerTournaments.Remove(pt);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task StartTournament(List<EncounterTournament> encounterTournaments, Guid tournamentId)
+    {
+        Tournament? t = await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
+        t.ActualRound = 1;
+        t.UpdatedAt = DateTime.Now;
+        t.Status = TournamentStatus.STARTED;
+        _context.Tournaments.Update(t);
+        _context.EncounterTournaments.AddRange(encounterTournaments);
         await _context.SaveChangesAsync();
     }
 }

@@ -19,6 +19,13 @@ public record TournamentSummaryDto(
     IEnumerable<CategoryDto> Categories,
     int RegisteredPlayerCount);
 
+public record EncounterDto(
+    Guid Id,
+    string Player1Username,
+    string Player2Username,
+    string? Result,
+    DateTime EncounterDate);
+
 public record TournamentDetailDto(
     Guid Id,
     string Name,
@@ -34,7 +41,8 @@ public record TournamentDetailDto(
     DateTime? CreatedAt,
     DateTime? UpdatedAt,
     IEnumerable<CategoryDto> Categories,
-    IEnumerable<PlayerSummaryDto> RegisteredPlayers);
+    IEnumerable<PlayerSummaryDto> RegisteredPlayers,
+    IEnumerable<EncounterDto> CurrentRoundEncounters);
 
 public record CreateTournamentDto(
     string Name,

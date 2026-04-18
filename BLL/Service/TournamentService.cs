@@ -141,4 +141,65 @@ public class TournamentService : ITournamentService
         await _repository.UnsubscribePlayerFromTournamentAsync(pt);
 
     }
+
+    public async Task StartTournamentAsync(Guid tournamentId)
+    {
+        Tournament? tournament = await _repository.GetTournamentByIdAsync(tournamentId);
+        if (tournament is null)
+            throw new NotFoundException("Impossible de trouver le tournoi.");
+        if (tournament.FinalRegisterDate > DateTime.Now)
+            throw new ValidationException("La date d'inscription n'est pas encoré arrivé a son terme.");
+        if (tournament.MinPlayer > tournament.PlayerTournaments.Count)
+            throw new InvalidDataException("Impossible de démarrer le tournoi car il manque des joueurs");
+
+        List<EncounterTournament> encounterTournaments = GenerateRoundRobin(tournament.PlayerTournaments.Select(p => p.PlayerId).ToList(), tournamentId);
+        await _repository.StartTournament(encounterTournaments, tournamentId);
+    }
+
+    private static List<EncounterTournament> GenerateRoundRobin(List<Guid> playerIds, Guid tournamentId)
+    {
+        var players = new List<Guid>(playerIds);
+
+        if (players.Count % 2 != 0)
+            players.Add(Guid.Empty);
+
+        int n = players.Count;
+        int maxRound = n - 1;
+        int matchesPerRound = n / 2;
+        var encounters = new List<EncounterTournament>();
+
+        for (int count = 0; count < 2; count++)
+        {
+            bool isReturn = count == 1;
+
+            for (int round = 0; round < maxRound; round++)
+            {
+                int roundNumber = round + (count * maxRound) + 1;
+
+                for (int i = 0; i < matchesPerRound; i++)
+                {
+                    Guid white = players[i];
+                    Guid black = players[n - 1 - i];
+
+                    if (white == Guid.Empty || black == Guid.Empty)
+                        continue;
+
+                    encounters.Add(new EncounterTournament
+                    {
+                        TournamentId = tournamentId,
+                        Player1      = isReturn ? black : white,
+                        Player2      = isReturn ? white : black,
+                        Round        = roundNumber,
+                        Result       = null,
+                        EncounterDate = DateTime.Today.AddDays(roundNumber - 1)
+                    });
+                }
+                
+                players.Insert(1, players[players.Count - 1]);
+                players.RemoveAt(players.Count - 1);
+            }
+        }
+
+        return encounters;
+    }
 }

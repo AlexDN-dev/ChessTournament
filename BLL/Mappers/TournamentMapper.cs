@@ -39,5 +39,13 @@ internal static class TournamentMapper
             t.CreatedAt,
             t.UpdatedAt,
             t.Categories.Select(c => c.ToDto()),
-            t.PlayerTournaments.Select(pt => pt.Player.ToSummaryDto()));
+            t.PlayerTournaments.Select(pt => pt.Player.ToSummaryDto()),
+            t.EncounterTournaments
+                .Where(e => e.Round == t.ActualRound)
+                .Select(e => new EncounterDto(
+                    e.Id,
+                    e.Player1Navigation.Username,
+                    e.Player2Navigation.Username,
+                    e.Result,
+                    e.EncounterDate)));
 }
