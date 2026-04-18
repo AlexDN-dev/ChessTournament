@@ -1,8 +1,10 @@
+using System.Text.Json;
 using DAL.Context;
 using DAL.Interfaces;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Filters;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;
@@ -54,5 +56,22 @@ public class TournamentRepository : ITournamentRepository
             .ThenInclude(pt => pt.Player)
             .AsNoTracking()
             .FirstOrDefaultAsync(t => t.Id == id);
+    }
+
+    public Guid CreateTournamentAsync(Tournament tournament, List<Guid> categoryIds)
+    {
+        var json = JsonSerializer.Serialize(new {
+            tournament.Name, tournament.Location,
+            tournament.MinPlayer, tournament.MaxPlayer,
+            tournament.MinElo, tournament.MaxElo,
+            tournament.WomenOnly, tournament.FinalRegisterDate,
+            CategoryIds = categoryIds
+        });
+        var param = new SqlParameter("@Json", json);
+
+        return _context.Database
+            .SqlQuery<Guid>($"EXEC dbo.AddTournament {param}")
+            .AsEnumerable()
+            .First();
     }
 }

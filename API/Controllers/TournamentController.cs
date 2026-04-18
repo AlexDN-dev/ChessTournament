@@ -40,4 +40,26 @@ public class TournamentController : ControllerBase
         var tournament = await _service.GetTournamentByIdAsync(id);
         return Ok(tournament);
     }
+
+    [HttpPost]
+    public async Task<ActionResult<TournamentDetailDto>> CreateTournament(CreateTournamentRequest request)
+    {
+        var input = new CreateTournamentDto
+        (
+            request.Name,
+            request.Location,
+            request.MinPlayer,
+            request.MaxPlayer,
+            request.MinElo,
+            request.MaxElo,
+            request.WomenOnly,
+            request.FinalRegisterDate,
+            request.CategoryIds
+            );
+
+        var tournamentId = await _service.CreateTournamentAsync(input);
+        var tournament = await _service.GetTournamentByIdAsync(tournamentId);
+
+        return CreatedAtAction(nameof(GetTournament), new { id = tournamentId }, tournament);
+    }
 }

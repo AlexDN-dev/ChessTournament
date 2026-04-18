@@ -77,7 +77,7 @@ BEGIN
 
         COMMIT TRANSACTION;
 
-        SELECT * FROM Tournaments WHERE Id = @Id;
+        SELECT @Id AS Id;
 
     END TRY
     BEGIN CATCH

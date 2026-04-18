@@ -35,3 +35,15 @@ public record TournamentDetailDto(
     DateTime? UpdatedAt,
     IEnumerable<CategoryDto> Categories,
     IEnumerable<PlayerSummaryDto> RegisteredPlayers);
+
+public record CreateTournamentDto(
+    string Name,
+    string Location,
+    int MinPlayer,
+    int MaxPlayer,
+    int? MinElo,
+    int? MaxElo,
+    bool WomenOnly,
+    DateTime? FinalRegisterDate,
+    List<Guid> CategoryIds
+);
