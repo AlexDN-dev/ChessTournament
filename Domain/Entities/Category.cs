@@ -9,5 +9,9 @@ public class Category
 
     public string Name { get; set; } = null!;
 
+    public int MinAge { get; set; }
+
+    public int MaxAge { get; set; }
+
     public virtual ICollection<Tournament> Tournaments { get; set; } = new List<Tournament>();
 }

@@ -25,7 +25,8 @@ public class CategoryService : ICategoryService
     {
         if (string.IsNullOrWhiteSpace(dto.Name))
             throw new ValidationException("Le nom de la catégorie est requis.");
-
+        if (dto.MinAge >= dto.MaxAge)
+            throw new ValidationException("L'age minimal est supérieur ou égal à l'age maximal.");
         var entity = dto.ToEntity();
         var created = await _repository.CreateCategoryAsync(entity);
         return created.ToDto();

@@ -26,7 +26,7 @@ public class CategoryController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CategoryDto>> CreateCategory(CreateCategoryRequest request)
     {
-        var created = await _service.CreateCategoryAsync(new CreateCategoryDto(request.Name));
+        var created = await _service.CreateCategoryAsync(new CreateCategoryDto(request.Name, request.MinAge, request.MaxAge));
         return CreatedAtAction(nameof(GetAll), new { id = created.Id }, created);
     }
 
