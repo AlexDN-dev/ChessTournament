@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Domain.Entities;
+using Domain.Enum;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Context;
@@ -123,9 +124,10 @@ public partial class ChessTournamentContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Status)
+                .HasConversion<string>()
                 .HasMaxLength(20)
                 .IsUnicode(false)
-                .HasDefaultValue("PENDING");
+                .HasDefaultValue(TournamentStatus.PENDING);
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");

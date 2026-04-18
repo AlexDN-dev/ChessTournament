@@ -1,34 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using Domain.Constants;
 
 namespace API.DTOs;
 
-public record PlayerUsernameDto(string Username);
+public record CreatePlayerRequest(
+    [Required(ErrorMessage = "Un pseudonyme est requis.")]
+    string Username,
 
-public record PlayerDto(
-    Guid Id, 
-    [Required (ErrorMessage = "Un pseudonyme est requis.")]
-    string Username,
-    [Required,MaxLength(200)]
+    [Required, MaxLength(200)]
     [EmailAddress(ErrorMessage = "Merci de rentrer un mail valide.")]
     string Email,
-    [Required (ErrorMessage = "Une date de naissance est requise.")]
-    DateTime Birthday,
-    [Required (ErrorMessage = "Un genre est requis.")]
-    string Gender, 
-    int? Elo);
-    
-public record CreatePlayerDto(
-    [Required (ErrorMessage = "Un pseudonyme est requis.")]
-    string Username,
-    [Required,MaxLength(200)]
-    [EmailAddress(ErrorMessage = "Merci de rentrer un mail valide.")]
-    string Email,
+
     [Required]
-    [RegularExpression(@"^(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$", ErrorMessage = "Merci de rentrer au moins 8 caractères, un chiffre et un caractère spécial.")]
+    [RegularExpression(PlayerConstants.PasswordRegex, ErrorMessage = PlayerConstants.PasswordRequirementsMessage)]
     string Password,
-    [Required (ErrorMessage = "Une date de naissance est requise.")]
-    DateTime BirthDay,
-    [Required (ErrorMessage = "Un genre est requis.")]
+
+    [Required(ErrorMessage = "Une date de naissance est requise.")]
+    DateTime Birthday,
+
+    [Required(ErrorMessage = "Un genre est requis.")]
     string Gender,
-    int Elo = 1200
-    );
+
+    int? Elo = PlayerConstants.DefaultElo
+);

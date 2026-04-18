@@ -1,14 +1,17 @@
-using BLL.Interfaces;
-using BLL.Service;
-using DAL.Context;
-using DAL.Repositories;
-using Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using API.Middleware;
+using BLL.Extensions;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -20,18 +23,18 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API pour gérer le tournoi d'échecs"
     });
 });
-builder.Services.AddDbContext<ChessTournamentContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IPlayerService, PlayerService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<ITournamentService, TournamentService>();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? throw new InvalidOperationException("Connection string 'DefaultConnection' manquante.");
 
-builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
+builder.Services.AddBll(connectionString);
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

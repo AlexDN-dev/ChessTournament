@@ -1,6 +1,8 @@
-﻿using BLL.Interfaces;
-using Domain.Entities;
-using Domain.Interfaces;
+using BLL.Dtos;
+using BLL.Interfaces;
+using BLL.Mappers;
+using DAL.Interfaces;
+using Domain.Exceptions;
 
 namespace BLL.Service;
 
@@ -13,24 +15,27 @@ public class CategoryService : ICategoryService
         _repository = repository;
     }
 
-    public async Task<IEnumerable<Category>> GetAllAsync()
+    public async Task<IEnumerable<CategoryDto>> GetAllAsync()
     {
         var categories = await _repository.GetAllAsync();
-        return categories;
+        return categories.Select(c => c.ToDto());
     }
 
-    public Task<int> CreateCategoryAsync(Category category)
+    public async Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto)
     {
-        return _repository.CreateCategoryAsync(category);
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            throw new ValidationException("Le nom de la catégorie est requis.");
 
+        var entity = dto.ToEntity();
+        var created = await _repository.CreateCategoryAsync(entity);
+        return created.ToDto();
     }
 
-    public async Task<int> DeleteCategory(Guid id)
+    public Task DeleteCategoryAsync(Guid id)
     {
         if (id == Guid.Empty)
-        {
-            throw new Exception("L'id n'est pas correct");
-        }
-        return await _repository.DeleteCategoryAsync(id);
+            throw new ValidationException("L'identifiant de la catégorie est invalide.");
+
+        return _repository.DeleteCategoryAsync(id);
     }
 }

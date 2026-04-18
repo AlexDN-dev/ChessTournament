@@ -1,10 +1,10 @@
-﻿using Domain.Entities;
+using BLL.Dtos;
 
 namespace BLL.Interfaces;
 
 public interface ICategoryService
 {
-    Task<IEnumerable<Category>> GetAllAsync();
-    Task<int> CreateCategoryAsync(Category category);
-    Task<int> DeleteCategory(Guid id);
+    Task<IEnumerable<CategoryDto>> GetAllAsync();
+    Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto);
+    Task DeleteCategoryAsync(Guid id);
 }

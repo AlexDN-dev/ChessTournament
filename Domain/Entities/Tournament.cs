@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Domain.Enum;
 
 namespace Domain.Entities;
 
@@ -19,7 +20,7 @@ public class Tournament
 
     public int? MaxElo { get; set; }
 
-    public string Status { get; set; } = null!;
+    public TournamentStatus Status { get; set; }
 
     public int? ActualRound { get; set; }
 

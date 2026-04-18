@@ -1,7 +1,9 @@
-﻿using BLL.Interfaces;
-using Domain.Entities;
+using BLL.Dtos;
+using BLL.Interfaces;
+using BLL.Mappers;
+using DAL.Interfaces;
+using Domain.Exceptions;
 using Domain.Filters;
-using Domain.Interfaces;
 
 namespace BLL.Service;
 
@@ -13,18 +15,22 @@ public class TournamentService : ITournamentService
     {
         _repository = repository;
     }
-    
-    public async Task<IEnumerable<Tournament>> GetAllAsync(TournamentFilter filter)
+
+    public async Task<IEnumerable<TournamentSummaryDto>> GetAllAsync(TournamentFilter filter)
     {
         var tournaments = await _repository.GetAllAsync(filter);
-        return tournaments;
+        return tournaments.Select(t => t.ToSummaryDto());
     }
 
-    public async Task<Tournament> GetTournamentById(Guid id)
+    public async Task<TournamentDetailDto> GetTournamentByIdAsync(Guid id)
     {
         if (id == Guid.Empty)
-            throw new Exception("Id invalide.");
-        var tournament = await _repository.GetTournamentById(id);
-        return tournament;
+            throw new ValidationException("L'identifiant du tournoi est invalide.");
+
+        var tournament = await _repository.GetTournamentByIdAsync(id);
+        if (tournament is null)
+            throw new NotFoundException($"Aucun tournoi trouvé avec l'identifiant '{id}'.");
+
+        return tournament.ToDetailDto();
     }
 }

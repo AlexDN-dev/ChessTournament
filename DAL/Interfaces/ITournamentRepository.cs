@@ -1,10 +1,10 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Domain.Filters;
 
-namespace Domain.Interfaces;
+namespace DAL.Interfaces;
 
 public interface ITournamentRepository
 {
     Task<IEnumerable<Tournament>> GetAllAsync(TournamentFilter filter);
-    Task<Tournament> GetTournamentById(Guid id);
+    Task<Tournament?> GetTournamentByIdAsync(Guid id);
 }

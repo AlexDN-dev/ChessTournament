@@ -1,12 +1,12 @@
-﻿using API.DTOs;
+using API.DTOs;
+using BLL.Dtos;
 using BLL.Interfaces;
-using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
-[Route("/api/[controller]")]
+[Route("api/[controller]")]
 public class CategoryController : ControllerBase
 {
     private readonly ICategoryService _service;
@@ -17,34 +17,23 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAll()
     {
         var categories = await _service.GetAllAsync();
-        return Ok(categories.Select(ToCategoryDto));
+        return Ok(categories);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateCategory(CreateCategoryDto categoryDto)
+    public async Task<ActionResult<CategoryDto>> CreateCategory(CreateCategoryRequest request)
     {
-        await _service.CreateCategoryAsync(ToEntity(categoryDto));
-        return StatusCode(201, "Catégorie créée avec succès");
+        var created = await _service.CreateCategoryAsync(new CreateCategoryDto(request.Name));
+        return CreatedAtAction(nameof(GetAll), new { id = created.Id }, created);
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        await _service.DeleteCategory(id);
-        return Ok("La catégorie à bien été supprimé.");
-    }
-
-    private static CategoryDto ToCategoryDto(Category c)
-        => new(c.Id, c.Name);
-
-    private static Category ToEntity(CreateCategoryDto c)
-    {
-        return new Category
-        {
-            Name = c.Name
-        };
+        await _service.DeleteCategoryAsync(id);
+        return NoContent();
     }
 }

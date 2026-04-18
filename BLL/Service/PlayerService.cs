@@ -1,7 +1,10 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
+using BLL.Dtos;
 using BLL.Interfaces;
-using Domain.Entities;
-using Domain.Interfaces;
+using BLL.Mappers;
+using DAL.Interfaces;
+using Domain.Constants;
+using Domain.Exceptions;
 
 namespace BLL.Service;
 
@@ -13,51 +16,34 @@ public class PlayerService : IPlayerService
     {
         _repository = repository;
     }
-    
-    public async Task<IEnumerable<Player>> GetAllAsync()
+
+    public async Task<IEnumerable<PlayerDto>> GetAllAsync()
     {
         var players = await _repository.GetAllAsync();
-        return players;
+        return players.Select(p => p.ToDto());
     }
 
-    public async Task<Player> GetPlayerByUsernameAsync(string username)
+    public async Task<PlayerDto> GetPlayerByUsernameAsync(string username)
     {
         var player = await _repository.GetPlayerByUsernameAsync(username);
         if (player is null)
-        {
-            throw new KeyNotFoundException("Aucun joueur trouvé avec cet email.");
-        }
+            throw new NotFoundException($"Aucun joueur trouvé avec le pseudo '{username}'.");
 
-        return player;
+        return player.ToDto();
     }
 
-    public async Task<Player> CreatePlayerAsync(Player player)
+    public async Task<PlayerDto> CreatePlayerAsync(CreatePlayerDto dto)
     {
-        var isExisting = await _repository.IfPlayerExistAsync(player.Email, player.Username);
-        if (isExisting != null)
-        {
-            if (isExisting.Username == player.Username)
-                throw new Exception("Username déjà utilisé");
+        if (!PlayerConstants.AllowedGenders.Contains(dto.Gender))
+            throw new ValidationException($"Genre invalide. Valeurs autorisées : {string.Join(", ", PlayerConstants.AllowedGenders)}.");
 
-            if (isExisting.Email == player.Email)
-                throw new Exception("Email déjà utilisé");
-        }
+        if (!Regex.IsMatch(dto.Password, PlayerConstants.PasswordRegex))
+            throw new ValidationException(PlayerConstants.PasswordRequirementsMessage);
 
-        if (player.Gender != "Homme" && player.Gender != "Femme")
-        {
-            throw new Exception("Merci de rentrer un genre valide");
-        }
+        var entity = dto.ToEntity();
+        entity.HashPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
-        
-        var regex = new Regex(@"^(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$");
-        bool isValidPassword = regex.IsMatch(player.HashPassword);
-        if (!isValidPassword)
-        {
-            throw new Exception("Le mot de passe doit avoir au moins 8 caractères, un chiffre et un caractère spécial");
-        }
-        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(player.HashPassword);
-        player.HashPassword = hashedPassword;
-        var p = await _repository.CreatePlayerAsync(player);
-        return p;
+        var created = await _repository.CreatePlayerAsync(entity);
+        return created!.ToDto();
     }
 }

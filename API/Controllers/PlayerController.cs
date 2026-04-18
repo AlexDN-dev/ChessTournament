@@ -1,6 +1,6 @@
-﻿using API.DTOs;
+using API.DTOs;
+using BLL.Dtos;
 using BLL.Interfaces;
-using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -15,46 +15,37 @@ public class PlayerController : ControllerBase
     {
         _service = service;
     }
-    // GET api/player
+
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<ActionResult<IEnumerable<PlayerDto>>> GetAll()
     {
         var players = await _service.GetAllAsync();
-        return Ok(players.Select(ToPlayerDto));
+        return Ok(players);
     }
-    //GET api/player/{username}
+
     [HttpGet("{username}")]
-    public async Task<IActionResult> GetPlayerByUsername(string username)
+    public async Task<ActionResult<PlayerDto>> GetPlayerByUsername(string username)
     {
         var player = await _service.GetPlayerByUsernameAsync(username);
         return Ok(player);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreatePlayer(CreatePlayerDto createPlayerDto)
+    public async Task<ActionResult<PlayerDto>> CreatePlayer(CreatePlayerRequest request)
     {
-        var player = await _service.CreatePlayerAsync(ToEntity(createPlayerDto));
+        var input = new CreatePlayerDto(
+            request.Username,
+            request.Email,
+            request.Password,
+            request.Birthday,
+            request.Gender,
+            request.Elo);
+
+        var player = await _service.CreatePlayerAsync(input);
 
         return CreatedAtAction(
             nameof(GetPlayerByUsername),
             new { username = player.Username },
-            ToPlayerDto(player)
-        );
-    }
-    
-    private static PlayerDto ToPlayerDto(Player p)
-        => new(p.Id, p.Username,p.Email, p.Birthday, p.Gender, p.Elo);
-
-    private static Player ToEntity(CreatePlayerDto p)
-    {
-        return new Player
-        {
-            Username = p.Username,
-            Email = p.Email,
-            HashPassword = p.Password,
-            Birthday = p.BirthDay,
-            Gender = p.Gender,
-            Elo = p.Elo
-        };
+            player);
     }
 }
