@@ -74,4 +74,12 @@ public class TournamentRepository : ITournamentRepository
             .AsEnumerable()
             .First();
     }
+
+    public async Task DeleteTournamentAsync(Guid id)
+    {
+        Tournament? t = await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == id);
+        _context.Tournaments.Remove(t);
+        await _context.SaveChangesAsync();
+        
+    }
 }

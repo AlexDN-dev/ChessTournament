@@ -1,3 +1,4 @@
+using System.Data;
 using BLL.Dtos;
 using BLL.Interfaces;
 using BLL.Mappers;
@@ -68,5 +69,17 @@ public class TournamentService : ITournamentService
 
         Guid tournamentId =  _repository.CreateTournamentAsync(t, dto.CategoryIds);
         return tournamentId;
+    }
+
+    public async Task DeleteTournamentAsync(Guid id)
+    {
+        Tournament? tournament = await _repository.GetTournamentByIdAsync(id);
+        if (tournament is null)
+            throw new NotFoundException("Le tournoi est introuvable");
+        if (tournament.Status != TournamentStatus.PENDING)
+            throw new DeletedRowInaccessibleException(
+                "Seuls les tournoi qui n'ont pas encore commencé peuvent être supprimé");
+        
+        await _repository.DeleteTournamentAsync(id);
     }
 }
