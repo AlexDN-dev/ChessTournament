@@ -14,4 +14,6 @@ public interface ITournamentRepository
     Task StartTournament(List<EncounterTournament> encounterTournaments, Guid tournamentId);
     Task<EncounterTournament> GetEncounterByIdAsync(Guid encounterId);
     Task UpdateEncounterAsync(Guid encounterId, string result);
+    Task NextRoundAsync(Guid tournamentId);
+    Task FinishTournamentAsync(Guid tournamentId);
 }

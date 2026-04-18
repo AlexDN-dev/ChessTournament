@@ -97,4 +97,11 @@ public class TournamentController : ControllerBase
         await _service.UpdateEncounterAsync(encounterId, result);
         return Ok("Le resultat de la rencontre a bien été mis à jour.");
     }
+
+    [HttpPut("next-round")]
+    public async Task<ActionResult> NextRound(Guid tournamentId)
+    {
+        await _service.NextRoundAsync(tournamentId);
+        return Ok("Le tournoi est passé à la round suivante");
+    }
 }

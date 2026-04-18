@@ -123,4 +123,20 @@ public class TournamentRepository : ITournamentRepository
         et.Result = result;
         await _context.SaveChangesAsync();
     }
+    
+    public async Task FinishTournamentAsync(Guid tournamentId)
+    {
+        Tournament? t = await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
+        t?.Status = TournamentStatus.FINISHED;
+        t?.UpdatedAt = DateTime.Now;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task NextRoundAsync(Guid tournamentId)
+    {
+        Tournament? t = await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
+        t.ActualRound += 1;
+        t.UpdatedAt = DateTime.Now;
+        await _context.SaveChangesAsync();
+    }
 }

@@ -158,13 +158,47 @@ public class TournamentService : ITournamentService
 
     public async Task UpdateEncounterAsync(Guid encounterId, string result)
     {
-        EncounterTournament? et = await _repository.GetEncounterByIdAsync(encounterId);
-        if (et is null)
-            throw new NotFoundException("Impossible de trouver la rencontre.");
-        if (result != "1-0" && result != "0-1" && result != "1/2-1/2")
-            throw new ValidationException("Le résultat entré pour la rencontre est invalide.");
+        var encounter = await _repository.GetEncounterByIdAsync(encounterId);
+        if (encounter is null)
+            throw new NotFoundException("Rencontre introuvable.");
+
+        var tournament = await _repository.GetTournamentByIdAsync(encounter.TournamentId);
+        if (tournament is null)
+            throw new NotFoundException("Tournoi introuvable.");
+
+        if (encounter.Round != tournament.ActualRound)
+            throw new ValidationException("Seule une rencontre de la round courante peut être modifiée.");
 
         await _repository.UpdateEncounterAsync(encounterId, result);
+        
+        bool roundComplete = tournament.EncounterTournaments
+            .Where(e => e.Round == tournament.ActualRound)
+            .All(e => e.Id == encounterId || e.Result != null);
+
+        if (roundComplete)
+        {
+            int totalRounds = (tournament.PlayerTournaments.Count - 1) * 2;
+            if (tournament.ActualRound >= totalRounds)
+                await _repository.FinishTournamentAsync(tournament.Id);
+        }
+    }
+
+    public async Task NextRoundAsync(Guid tournamentId)
+    {
+        Tournament? tournament = await _repository.GetTournamentByIdAsync(tournamentId);
+        int totalRounds = (tournament.PlayerTournaments.Count - 1) * 2;
+        
+        if (tournament is null)
+            throw new NotFoundException("Impossible de trouver le tournoi.");
+        if (tournament.EncounterTournaments.Any(et => et.Result == null))
+            throw new ValidationException(
+                "Impossible de passer à la round suivante, il manque un/des résultats aux matchs actuels");
+        if (tournament.Status != TournamentStatus.STARTED)
+            throw new ValidationException("Le tournoi n'a pas encore commencé ou est terminé.");
+        if (tournament.ActualRound >= totalRounds)
+            throw new ValidationException("Le tournoi est déjà à sa dernière round.");
+
+        await _repository.NextRoundAsync(tournamentId);
     }
 
     private static List<EncounterTournament> GenerateRoundRobin(List<Guid> playerIds, Guid tournamentId)

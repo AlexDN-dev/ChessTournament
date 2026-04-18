@@ -13,4 +13,5 @@ public interface ITournamentService
     Task UnsubscribePlayerFromTournamentAsync(string playerUsername, Guid tournamentId);
     Task StartTournamentAsync(Guid tournamentId);
     Task UpdateEncounterAsync(Guid encounterId, string result);
+    Task NextRoundAsync(Guid tournamentId);
 }
