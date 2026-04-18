@@ -69,4 +69,18 @@ public class TournamentController : ControllerBase
         await _service.DeleteTournamentAsync(id);
         return NoContent();
     }
+
+    [HttpPost("register-player")]
+    public async Task<ActionResult> RegisterPlayerToTournament(string playerUsername, Guid tournamentId)
+    {
+        await _service.RegisterPlayerToTournamentAsync(playerUsername, tournamentId);
+        return Ok("Le joueur a bien été inscrit au tournoi.");
+    }
+
+    [HttpDelete("unsubscribe-player")]
+    public async Task<ActionResult> UnsubscribePlayerFromTournament(string playerUsername, Guid tournamentId)
+    {
+        await _service.UnsubscribePlayerFromTournamentAsync(playerUsername, tournamentId);
+        return Ok("Le joueur à bien été désinscrit du tournoi.");
+    }
 }

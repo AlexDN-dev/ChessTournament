@@ -22,3 +22,13 @@ public sealed class ValidationException : ChessTournamentException
     public ValidationException(string message) : base(message) { }
     public ValidationException(string message, Exception inner) : base(message, inner) { }
 }
+
+public sealed class ExpirationRegisterDateException : ChessTournamentException
+{
+    public ExpirationRegisterDateException(string message) : base(message) {}
+}
+
+public sealed class PlayerAlreadyRegisterException : ChessTournamentException
+{
+    public PlayerAlreadyRegisterException(string message) : base(message) {}
+}

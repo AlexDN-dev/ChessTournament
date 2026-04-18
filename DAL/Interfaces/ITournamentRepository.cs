@@ -9,4 +9,6 @@ public interface ITournamentRepository
     Task<Tournament?> GetTournamentByIdAsync(Guid id);
     Guid CreateTournamentAsync(Tournament tournament, List<Guid> categoryIds);
     Task DeleteTournamentAsync(Guid id);
+    Task RegisterPlayerToTournamentAsync(PlayerTournament pt);
+    Task UnsubscribePlayerFromTournamentAsync(PlayerTournament pt);
 }

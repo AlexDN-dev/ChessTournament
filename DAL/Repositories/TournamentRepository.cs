@@ -82,4 +82,16 @@ public class TournamentRepository : ITournamentRepository
         await _context.SaveChangesAsync();
         
     }
+
+    public async Task RegisterPlayerToTournamentAsync(PlayerTournament pt)
+    { 
+        _context.PlayerTournaments.Add(pt);
+        await _context.SaveChangesAsync();
+    }
+
+     public async Task UnsubscribePlayerFromTournamentAsync(PlayerTournament pt)
+    {
+        _context.PlayerTournaments.Remove(pt);
+        await _context.SaveChangesAsync();
+    }
 }

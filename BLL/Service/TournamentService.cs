@@ -13,10 +13,12 @@ namespace BLL.Service;
 public class TournamentService : ITournamentService
 {
     private readonly ITournamentRepository _repository;
+    private readonly IPlayerRepository _playerRepository;
 
-    public TournamentService(ITournamentRepository repository)
+    public TournamentService(ITournamentRepository repository, IPlayerRepository playerRepository)
     {
         _repository = repository;
+        _playerRepository = playerRepository;
     }
 
     public async Task<IEnumerable<TournamentSummaryDto>> GetAllAsync(TournamentFilter filter)
@@ -81,5 +83,62 @@ public class TournamentService : ITournamentService
                 "Seuls les tournoi qui n'ont pas encore commencé peuvent être supprimé");
         
         await _repository.DeleteTournamentAsync(id);
+    }
+
+    public async Task RegisterPlayerToTournamentAsync(string playerUsername, Guid tournamentId)
+    {
+        Tournament? tournament = await _repository.GetTournamentByIdAsync(tournamentId);
+        if (tournament is null)
+            throw new NotFoundException("Impossible de trouver le tournoi.");
+        Player? player = await _playerRepository.GetPlayerByUsernameAsync(playerUsername);
+        if (player is null)
+            throw new NotFoundException("Impossible de trouver le joueur");
+
+        if (tournament.Status != TournamentStatus.PENDING)
+            throw new ValidationException("Impossible d'inscrire le joueur, le tournoir a déjà commencé.");
+        if (tournament.FinalRegisterDate <= DateTime.Now)
+            throw new ExpirationRegisterDateException("La date d'inscription est dépassée");
+        if (tournament.PlayerTournaments.Any(p => p.PlayerId == player.Id))
+            throw new PlayerAlreadyRegisterException("Le joueur est déjà inscrit dans ce tournoi");
+        if (tournament.MaxPlayer == tournament.PlayerTournaments.Count)
+            throw new InvalidDataException("Le maximum de joueur a été atteint pour ce tournoi.");
+        
+        int age = tournament.FinalRegisterDate.HasValue
+            ? (int)((tournament.FinalRegisterDate.Value - player.Birthday).TotalDays / 365.25)
+            : throw new ValidationException("Le tournoi n'a pas de date de fin d'inscription.");
+        
+        if (!tournament.Categories.Any(c => age >= c.MinAge && age <= c.MaxAge))
+            throw new ValidationException("L'âge du joueur ne correspond à aucune catégorie autorisée.");
+
+        if (tournament.MinElo is not null && player.Elo < tournament.MinElo)
+            throw new ValidationException("Le joueur n'a pas assez d'ELO pour rejoindre ce tournoi");
+        if (tournament.MaxElo is not null && player.Elo > tournament.MaxElo)
+            throw new ValidationException("Le joueur a trop d'ELO pour rejoindre ce tournoi");
+        if (tournament.WomenOnly && player.Gender != "Femme")
+            throw new ValidationException("Le joueur doit être une femme pour participer à ce tournoi.");
+
+        PlayerTournament pt = new PlayerTournament
+            { TournamentId = tournament.Id, PlayerId = player.Id, RegisterDate = DateTime.Now };
+
+        await _repository.RegisterPlayerToTournamentAsync(pt);
+    }
+
+    public async Task UnsubscribePlayerFromTournamentAsync(string playerUsername, Guid tournamentId)
+    {
+        Tournament? tournament = await _repository.GetTournamentByIdAsync(tournamentId);
+        if (tournament is null)
+            throw new NotFoundException("Impossible de trouver le tournoi.");
+        Player? player = await _playerRepository.GetPlayerByUsernameAsync(playerUsername);
+        if (player is null)
+            throw new NotFoundException("Impossible de trouver le joueur");
+
+        if (tournament.Status != TournamentStatus.PENDING)
+            throw new ValidationException("Impossible de désinscrire le joueur car le tournoi à déjà commencé.");
+        if (tournament.PlayerTournaments.All(p => p.PlayerId != player.Id))
+            throw new ValidationException("Le joueur n'est pas inscrit à ce tournoi.");
+        PlayerTournament pt = new PlayerTournament
+            { TournamentId = tournament.Id, PlayerId = player.Id };
+        await _repository.UnsubscribePlayerFromTournamentAsync(pt);
+
     }
 }

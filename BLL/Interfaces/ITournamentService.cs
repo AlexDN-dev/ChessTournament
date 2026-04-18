@@ -9,4 +9,6 @@ public interface ITournamentService
     Task<TournamentDetailDto> GetTournamentByIdAsync(Guid id);
     Task<Guid> CreateTournamentAsync(CreateTournamentDto dto);
     Task DeleteTournamentAsync(Guid id);
+    Task RegisterPlayerToTournamentAsync(string playerUsername, Guid tournamentId);
+    Task UnsubscribePlayerFromTournamentAsync(string playerUsername, Guid tournamentId);
 }
