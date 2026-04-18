@@ -6,4 +6,5 @@ namespace BLL.Interfaces;
 public interface ITournamentService
 {
     Task<IEnumerable<Tournament>> GetAllAsync(TournamentFilter filter);
+    Task<Tournament> GetTournamentById(Guid id);
 }

@@ -2,7 +2,7 @@
 
 namespace API.DTOs;
 
-public record TournamentDto(
+public record TournamentPaginationResDto(
     Guid Id,
     string Name,
     string Location,
@@ -16,7 +16,25 @@ public record TournamentDto(
     DateTime FinalRegisterDate,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    IEnumerable<CategoryDto> Categories
+    IEnumerable<CategoryDto> Categories,
+    int registedPlayerCount
+    );
+public record GetTournamentDto(
+    Guid Id,
+    string Name,
+    string Location,
+    int MinPlayer,
+    int MaxPlayer,
+    int MinElo,
+    int MaxElo,
+    string Status,
+    int ActualRound,
+    bool WomenOnly,
+    DateTime FinalRegisterDate,
+    DateTime CreatedAt,
+    DateTime UpdatedAt,
+    IEnumerable<CategoryDto> Categories,
+    IEnumerable<PlayerUsernameDto> registedPlayer
     );
     
 public record TournamentPaginationDto(

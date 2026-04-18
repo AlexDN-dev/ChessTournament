@@ -19,6 +19,7 @@ public class TournamentRepository : ITournamentRepository
     {
         var query = _context.Tournaments
             .Include(t => t.Categories)
+            .Include(t => t.PlayerTournaments)
             .AsNoTracking()
             .AsQueryable();
         
@@ -45,5 +46,16 @@ public class TournamentRepository : ITournamentRepository
             .Take(pageSize);
 
         return await query.ToListAsync();
+    }
+
+    public async Task<Tournament> GetTournamentById(Guid id)
+    {
+        var tournament = await _context.Tournaments
+            .Include(t => t.Categories)
+            .Include(t => t.PlayerTournaments)
+            .ThenInclude(pt => pt.Player)
+            .AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
+
+        return tournament;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace API.DTOs;
 
+public record PlayerUsernameDto(string Username);
+
 public record PlayerDto(
     Guid Id, 
     [Required (ErrorMessage = "Un pseudonyme est requis.")]

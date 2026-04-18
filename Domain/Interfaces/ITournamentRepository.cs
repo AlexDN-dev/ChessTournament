@@ -6,4 +6,5 @@ namespace Domain.Interfaces;
 public interface ITournamentRepository
 {
     Task<IEnumerable<Tournament>> GetAllAsync(TournamentFilter filter);
+    Task<Tournament> GetTournamentById(Guid id);
 }
