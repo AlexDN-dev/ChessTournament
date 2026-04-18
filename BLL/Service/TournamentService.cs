@@ -156,6 +156,17 @@ public class TournamentService : ITournamentService
         await _repository.StartTournament(encounterTournaments, tournamentId);
     }
 
+    public async Task UpdateEncounterAsync(Guid encounterId, string result)
+    {
+        EncounterTournament? et = await _repository.GetEncounterByIdAsync(encounterId);
+        if (et is null)
+            throw new NotFoundException("Impossible de trouver la rencontre.");
+        if (result != "1-0" && result != "0-1" && result != "1/2-1/2")
+            throw new ValidationException("Le résultat entré pour la rencontre est invalide.");
+
+        await _repository.UpdateEncounterAsync(encounterId, result);
+    }
+
     private static List<EncounterTournament> GenerateRoundRobin(List<Guid> playerIds, Guid tournamentId)
     {
         var players = new List<Guid>(playerIds);

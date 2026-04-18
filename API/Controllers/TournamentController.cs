@@ -90,4 +90,11 @@ public class TournamentController : ControllerBase
         await _service.StartTournamentAsync(tournamentId);
         return Ok("Le tournoi a bien débuté.");
     }
+
+    [HttpPut("update-encounter")]
+    public async Task<ActionResult> UpdateEncounter(Guid encounterId, string result)
+    {
+        await _service.UpdateEncounterAsync(encounterId, result);
+        return Ok("Le resultat de la rencontre a bien été mis à jour.");
+    }
 }

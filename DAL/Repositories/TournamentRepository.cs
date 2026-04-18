@@ -110,4 +110,17 @@ public class TournamentRepository : ITournamentRepository
         _context.EncounterTournaments.AddRange(encounterTournaments);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<EncounterTournament> GetEncounterByIdAsync(Guid encounterId)
+    {
+        EncounterTournament? et = await _context.EncounterTournaments.FirstOrDefaultAsync(et => et.Id == encounterId);
+        return et;
+    }
+
+    public async Task UpdateEncounterAsync(Guid encounterId, string result)
+    {
+        EncounterTournament? et = await _context.EncounterTournaments.FirstOrDefaultAsync(et => et.Id == encounterId);
+        et.Result = result;
+        await _context.SaveChangesAsync();
+    }
 }
