@@ -1,148 +1,150 @@
 ﻿using System;
 using System.Collections.Generic;
-using DAL.Entities;
+using Domain.Entities;
+using Domain.Enum;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Context;
 
 public partial class ChessTournamentContext : DbContext
 {
-    public ChessTournamentContext(DbContextOptions<DbContext> options)
+    public ChessTournamentContext(DbContextOptions<ChessTournamentContext> options)
         : base(options)
     {
     }
 
-    public virtual DbSet<category> categories { get; set; }
+    public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<encounterTournament> encounterTournaments { get; set; }
+    public virtual DbSet<EncounterTournament> EncounterTournaments { get; set; }
 
-    public virtual DbSet<player> players { get; set; }
+    public virtual DbSet<Player> Players { get; set; }
 
-    public virtual DbSet<playerTournament> playerTournaments { get; set; }
+    public virtual DbSet<PlayerTournament> PlayerTournaments { get; set; }
 
-    public virtual DbSet<tournament> tournaments { get; set; }
+    public virtual DbSet<Tournament> Tournaments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<category>(entity =>
+        modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("PK__categori__3213E83FDD962333");
+            entity.HasKey(e => e.Id).HasName("PK__Categori__3214EC073141A890");
 
-            entity.HasIndex(e => e.name, "UQ__categori__72E12F1B70083127").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Categori__737584F62266D9BE").IsUnique();
 
-            entity.Property(e => e.id).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.name)
+            entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<encounterTournament>(entity =>
+        modelBuilder.Entity<EncounterTournament>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("PK__encounte__3213E83FFC60F125");
+            entity.HasKey(e => e.Id).HasName("PK__Encounte__3214EC075E8B4596");
 
-            entity.HasIndex(e => new { e.tournamentId, e.player1, e.player2, e.round }, "IX_match_unique").IsUnique();
+            entity.HasIndex(e => new { e.TournamentId, e.Player1, e.Player2, e.Round }, "IX_match_unique").IsUnique();
 
-            entity.Property(e => e.id).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.encounterDate).HasColumnType("datetime");
-            entity.Property(e => e.result)
+            entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.EncounterDate).HasColumnType("datetime");
+            entity.Property(e => e.Result)
                 .HasMaxLength(10)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.player1Navigation).WithMany(p => p.encounterTournamentplayer1Navigations)
-                .HasForeignKey(d => d.player1)
+            entity.HasOne(d => d.Player1Navigation).WithMany(p => p.EncounterTournamentPlayer1Navigations)
+                .HasForeignKey(d => d.Player1)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__encounter__playe__412EB0B6");
+                .HasConstraintName("FK__Encounter__Playe__412EB0B6");
 
-            entity.HasOne(d => d.player2Navigation).WithMany(p => p.encounterTournamentplayer2Navigations)
-                .HasForeignKey(d => d.player2)
+            entity.HasOne(d => d.Player2Navigation).WithMany(p => p.EncounterTournamentPlayer2Navigations)
+                .HasForeignKey(d => d.Player2)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__encounter__playe__4222D4EF");
+                .HasConstraintName("FK__Encounter__Playe__4222D4EF");
 
-            entity.HasOne(d => d.tournament).WithMany(p => p.encounterTournaments)
-                .HasForeignKey(d => d.tournamentId)
-                .HasConstraintName("FK__encounter__tourn__403A8C7D");
+            entity.HasOne(d => d.Tournament).WithMany(p => p.EncounterTournaments)
+                .HasForeignKey(d => d.TournamentId)
+                .HasConstraintName("FK__Encounter__Tourn__403A8C7D");
         });
 
-        modelBuilder.Entity<player>(entity =>
+        modelBuilder.Entity<Player>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("PK__players__3213E83F70336CA4");
+            entity.HasKey(e => e.Id).HasName("PK__Players__3214EC07A99FB9A6");
 
-            entity.HasIndex(e => e.email, "UQ__players__AB6E616443A93C28").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__Players__536C85E4CF5A1D31").IsUnique();
 
-            entity.HasIndex(e => e.username, "UQ__players__F3DBC57232DCFE23").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__Players__A9D1053478F7EBB3").IsUnique();
 
-            entity.Property(e => e.id).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.birthday).HasColumnType("datetime");
-            entity.Property(e => e.elo).HasDefaultValue(1200);
-            entity.Property(e => e.email)
+            entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.Birthday).HasColumnType("datetime");
+            entity.Property(e => e.Elo).HasDefaultValue(1200);
+            entity.Property(e => e.Email)
                 .HasMaxLength(200)
                 .IsUnicode(false);
-            entity.Property(e => e.gender)
+            entity.Property(e => e.Gender)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.hashPassword)
+            entity.Property(e => e.HashPassword)
                 .HasMaxLength(200)
                 .IsUnicode(false);
-            entity.Property(e => e.role).HasDefaultValue(0);
-            entity.Property(e => e.username)
+            entity.Property(e => e.Role).HasDefaultValue(0);
+            entity.Property(e => e.Username)
                 .HasMaxLength(50)
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<playerTournament>(entity =>
+        modelBuilder.Entity<PlayerTournament>(entity =>
         {
-            entity.HasKey(e => new { e.tournamentId, e.playerId }).HasName("PK__playerTo__903644D7082EBEDF");
+            entity.HasKey(e => new { e.TournamentId, e.PlayerId }).HasName("PK__PlayerTo__38C7F45F720E52DA");
 
-            entity.Property(e => e.registerDate)
+            entity.Property(e => e.RegisterDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
 
-            entity.HasOne(d => d.player).WithMany(p => p.playerTournaments)
-                .HasForeignKey(d => d.playerId)
-                .HasConstraintName("FK__playerTou__playe__3C69FB99");
+            entity.HasOne(d => d.Player).WithMany(p => p.PlayerTournaments)
+                .HasForeignKey(d => d.PlayerId)
+                .HasConstraintName("FK__PlayerTou__Playe__3C69FB99");
 
-            entity.HasOne(d => d.tournament).WithMany(p => p.playerTournaments)
-                .HasForeignKey(d => d.tournamentId)
-                .HasConstraintName("FK__playerTou__tourn__3D5E1FD2");
+            entity.HasOne(d => d.Tournament).WithMany(p => p.PlayerTournaments)
+                .HasForeignKey(d => d.TournamentId)
+                .HasConstraintName("FK__PlayerTou__Tourn__3D5E1FD2");
         });
 
-        modelBuilder.Entity<tournament>(entity =>
+        modelBuilder.Entity<Tournament>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("PK__tourname__3213E83F63CF1C1E");
+            entity.HasKey(e => e.Id).HasName("PK__Tourname__3214EC079500E564");
 
-            entity.Property(e => e.id).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.actualRound).HasDefaultValue(0);
-            entity.Property(e => e.createdAt)
+            entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.ActualRound).HasDefaultValue(0);
+            entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-            entity.Property(e => e.finalRegisterDate).HasColumnType("datetime");
-            entity.Property(e => e.location)
+            entity.Property(e => e.FinalRegisterDate).HasColumnType("datetime");
+            entity.Property(e => e.Location)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-            entity.Property(e => e.name)
+            entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-            entity.Property(e => e.status)
+            entity.Property(e => e.Status)
+                .HasConversion<string>()
                 .HasMaxLength(20)
                 .IsUnicode(false)
-                .HasDefaultValue("PENDING");
-            entity.Property(e => e.updatedAt)
+                .HasDefaultValue(TournamentStatus.PENDING);
+            entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
 
-            entity.HasMany(d => d.categories).WithMany(p => p.tournaments)
+            entity.HasMany(d => d.Categories).WithMany(p => p.Tournaments)
                 .UsingEntity<Dictionary<string, object>>(
-                    "tournamentCategory",
-                    r => r.HasOne<category>().WithMany()
-                        .HasForeignKey("categoryId")
-                        .HasConstraintName("FK__tournamen__categ__3F466844"),
-                    l => l.HasOne<tournament>().WithMany()
-                        .HasForeignKey("tournamentId")
-                        .HasConstraintName("FK__tournamen__tourn__3E52440B"),
+                    "TournamentCategory",
+                    r => r.HasOne<Category>().WithMany()
+                        .HasForeignKey("CategoryId")
+                        .HasConstraintName("FK__Tournamen__Categ__3F466844"),
+                    l => l.HasOne<Tournament>().WithMany()
+                        .HasForeignKey("TournamentId")
+                        .HasConstraintName("FK__Tournamen__Tourn__3E52440B"),
                     j =>
                     {
-                        j.HasKey("tournamentId", "categoryId").HasName("PK__tourname__00C74BD560BC92B1");
-                        j.ToTable("tournamentCategories");
+                        j.HasKey("TournamentId", "CategoryId").HasName("PK__Tourname__0DF380B310E09354");
+                        j.ToTable("TournamentCategories");
                     });
         });
 
