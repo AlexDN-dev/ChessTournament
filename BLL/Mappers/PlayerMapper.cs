@@ -11,12 +11,12 @@ internal static class PlayerMapper
     public static PlayerSummaryDto ToSummaryDto(this Player p)
         => new(p.Id, p.Username);
 
-    public static Player ToEntity(this CreatePlayerDto dto)
+    public static Player ToEntity(this CreatePlayerDto dto, string password)
         => new()
         {
             Username = dto.Username,
             Email = dto.Email,
-            HashPassword = dto.Password,
+            HashPassword = password,
             Birthday = dto.Birthday,
             Gender = dto.Gender,
             Elo = dto.Elo

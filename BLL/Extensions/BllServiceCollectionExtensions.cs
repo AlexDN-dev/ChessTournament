@@ -15,6 +15,7 @@ public static class BllServiceCollectionExtensions
         services.AddScoped<ITournamentService, TournamentService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IScoreService, ScoreService>();
+        services.AddScoped<IEmailService, EmailService>();
 
         return services;
     }

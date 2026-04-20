@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 using BLL.Dtos;
 using BLL.Interfaces;
@@ -11,10 +12,12 @@ namespace BLL.Service;
 public class PlayerService : IPlayerService
 {
     private readonly IPlayerRepository _repository;
+    private readonly IEmailService _emailService;
 
-    public PlayerService(IPlayerRepository repository)
+    public PlayerService(IPlayerRepository repository, IEmailService emailService)
     {
         _repository = repository;
+        _emailService = emailService;
     }
 
     public async Task<IEnumerable<PlayerDto>> GetAllAsync()
@@ -36,14 +39,31 @@ public class PlayerService : IPlayerService
     {
         if (!PlayerConstants.AllowedGenders.Contains(dto.Gender))
             throw new ValidationException($"Genre invalide. Valeurs autorisées : {string.Join(", ", PlayerConstants.AllowedGenders)}.");
-
-        if (!Regex.IsMatch(dto.Password, PlayerConstants.PasswordRegex))
-            throw new ValidationException(PlayerConstants.PasswordRequirementsMessage);
-
-        var entity = dto.ToEntity();
-        entity.HashPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+        
+        string password = CreatePassword(10);
+        var entity = dto.ToEntity(password);
+        entity.HashPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
         var created = await _repository.CreatePlayerAsync(entity);
+
+        await _emailService.SendEmailAsync(dto.Email, "Création du compte ChessTournament",
+            $@"<h1>Bonjour {entity.Username}, Bienvenue sur ChessTournament !</h1>
+                <p>Voici le mot de passe de ton compte : {password}</p>
+                <p>N'oublie pas de le changer après ta première connexion.</p>
+                <p>Bon jeu à toi !</p>");
+        
         return created!.ToDto();
+    }
+    
+    private static string CreatePassword(int length)
+    {
+        const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890&@#{[^{}]";
+        StringBuilder res = new StringBuilder();
+        Random rnd = new Random();
+        while (0 < length--)
+        {
+            res.Append(valid[rnd.Next(valid.Length)]);
+        }
+        return res.ToString();
     }
 }
