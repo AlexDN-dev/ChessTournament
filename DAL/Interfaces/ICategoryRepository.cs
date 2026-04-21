@@ -2,9 +2,6 @@ using Domain.Entities;
 
 namespace DAL.Interfaces;
 
-public interface ICategoryRepository
+public interface ICategoryRepository : IRepository<Category>
 {
-    Task<IEnumerable<Category>> GetAllAsync();
-    Task<Category> CreateCategoryAsync(Category category);
-    Task DeleteCategoryAsync(Guid id);
 }

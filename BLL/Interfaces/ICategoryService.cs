@@ -2,9 +2,6 @@ using BLL.Dtos;
 
 namespace BLL.Interfaces;
 
-public interface ICategoryService
+public interface ICategoryService : IService<CategoryDto, CreateCategoryDto>
 {
-    Task<IEnumerable<CategoryDto>> GetAllAsync();
-    Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto);
-    Task DeleteCategoryAsync(Guid id);
 }

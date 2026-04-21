@@ -26,14 +26,14 @@ public class CategoryController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CategoryDto>> CreateCategory(CreateCategoryRequest request)
     {
-        var created = await _service.CreateCategoryAsync(new CreateCategoryDto(request.Name, request.MinAge, request.MaxAge));
+        var created = await _service.CreateAsync(new CreateCategoryDto(request.Name, request.MinAge, request.MaxAge));
         return CreatedAtAction(nameof(GetAll), new { id = created.Id }, created);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        await _service.DeleteCategoryAsync(id);
+        await _service.DeleteAsync(id);
         return NoContent();
     }
 }
