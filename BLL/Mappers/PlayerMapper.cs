@@ -21,4 +21,13 @@ internal static class PlayerMapper
             Gender = dto.Gender,
             Elo = dto.Elo
         };
+
+    public static LoginDto toLoginDto(this Player p, string token)
+        => new(
+            p.Username,
+            p.Role,
+            p.Elo ?? 1200,
+            token,
+            DateTime.UtcNow.AddHours(1)
+        );
 }

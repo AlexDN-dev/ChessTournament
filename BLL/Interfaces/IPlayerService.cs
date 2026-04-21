@@ -7,4 +7,5 @@ public interface IPlayerService
     Task<IEnumerable<PlayerDto>> GetAllAsync();
     Task<PlayerDto> GetPlayerByUsernameAsync(string username);
     Task<PlayerDto> CreatePlayerAsync(CreatePlayerDto dto);
+    Task<LoginDto> LoginPlayerAsync(LoginPlayerDto dto);
 }

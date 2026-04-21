@@ -11,10 +11,6 @@ public record CreatePlayerRequest(
     [EmailAddress(ErrorMessage = "Merci de rentrer un mail valide.")]
     string Email,
 
-    [Required]
-    [RegularExpression(PlayerConstants.PasswordRegex, ErrorMessage = PlayerConstants.PasswordRequirementsMessage)]
-    string Password,
-
     [Required(ErrorMessage = "Une date de naissance est requise.")]
     DateTime Birthday,
 
@@ -22,4 +18,11 @@ public record CreatePlayerRequest(
     string Gender,
 
     int? Elo = PlayerConstants.DefaultElo
+);
+
+public record LoginPlayerRequest(
+    [Required(ErrorMessage = "Le nom d'utilisateur est requis.")]
+    string Username,
+    [Required(ErrorMessage = "Le mot de passe est requis.")]
+    string Password
 );

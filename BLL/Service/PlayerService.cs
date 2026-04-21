@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using BLL.Dtos;
@@ -13,11 +14,13 @@ public class PlayerService : IPlayerService
 {
     private readonly IPlayerRepository _repository;
     private readonly IEmailService _emailService;
+    private readonly ITokenService _tokenService;
 
-    public PlayerService(IPlayerRepository repository, IEmailService emailService)
+    public PlayerService(IPlayerRepository repository, IEmailService emailService, ITokenService tokenservice)
     {
         _repository = repository;
         _emailService = emailService;
+        _tokenService = tokenservice;
     }
 
     public async Task<IEnumerable<PlayerDto>> GetAllAsync()
@@ -54,7 +57,26 @@ public class PlayerService : IPlayerService
         
         return created!.ToDto();
     }
-    
+
+    public async Task<LoginDto> LoginPlayerAsync(LoginPlayerDto dto)
+    {
+        var player = await _repository.GetPlayerByUsernameAsync(dto.Username);
+        if (player is null)
+            throw new ValidationException("Le nom d'utilisateur ou le mot de passe est incorrecte.");
+        if (!BCrypt.Net.BCrypt.Verify(dto.Password, player.HashPassword))
+            throw new ValidationException("Le nom d'utilisateur ou le mot de passe est incorrecte.");
+
+        List<Claim> claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, player.Id.ToString()),
+            new Claim(ClaimTypes.Name, player.Username),
+            new Claim(ClaimTypes.Role, player.Role.ToString())
+        };
+
+        string token = _tokenService.GenerateAccessToken(claims);
+        return player.toLoginDto(token);
+    }
+
     private static string CreatePassword(int length)
     {
         const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890&@#{[^{}]";
