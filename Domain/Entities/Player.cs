@@ -17,7 +17,7 @@ public class Player
 
     public string Gender { get; set; } = null!;
 
-    public int? Role { get; set; }
+    public string Role { get; set; } = null!;
 
     public int? Elo { get; set; }
 

@@ -10,14 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;
 
-public class TournamentRepository : ITournamentRepository
+public class TournamentRepository : Repository<Tournament>,ITournamentRepository
 {
-    private readonly ChessTournamentContext _context;
-
-    public TournamentRepository(ChessTournamentContext context)
-    {
-        _context = context;
-    }
+    public TournamentRepository(ChessTournamentContext context) : base(context) {  }
 
     public async Task<IEnumerable<Tournament>> GetAllAsync(TournamentFilter filter)
     {
@@ -49,7 +44,7 @@ public class TournamentRepository : ITournamentRepository
         return await query.ToListAsync();
     }
 
-    public async Task<Tournament?> GetTournamentByIdAsync(Guid id)
+    public override async Task<Tournament?> GetByIdAsync(Guid id)
     {
         return await _context.Tournaments
             .Include(t => t.Categories)
@@ -78,14 +73,6 @@ public class TournamentRepository : ITournamentRepository
             .SqlQuery<Guid>($"EXEC dbo.AddTournament {param}")
             .AsEnumerable()
             .First();
-    }
-
-    public async Task DeleteTournamentAsync(Guid id)
-    {
-        Tournament? t = await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == id);
-        _context.Tournaments.Remove(t);
-        await _context.SaveChangesAsync();
-        
     }
 
     public async Task RegisterPlayerToTournamentAsync(PlayerTournament pt)

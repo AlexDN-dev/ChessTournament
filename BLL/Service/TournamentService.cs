@@ -32,7 +32,7 @@ public class TournamentService : ITournamentService
         if (id == Guid.Empty)
             throw new ValidationException("L'identifiant du tournoi est invalide.");
 
-        var tournament = await _repository.GetTournamentByIdAsync(id);
+        var tournament = await _repository.GetByIdAsync(id);
         if (tournament is null)
             throw new NotFoundException($"Aucun tournoi trouvé avec l'identifiant '{id}'.");
 
@@ -75,19 +75,19 @@ public class TournamentService : ITournamentService
 
     public async Task DeleteTournamentAsync(Guid id)
     {
-        Tournament? tournament = await _repository.GetTournamentByIdAsync(id);
+        Tournament? tournament = await _repository.GetByIdAsync(id);
         if (tournament is null)
             throw new NotFoundException("Le tournoi est introuvable");
         if (tournament.Status != TournamentStatus.PENDING)
             throw new DeletedRowInaccessibleException(
                 "Seuls les tournoi qui n'ont pas encore commencé peuvent être supprimé");
         
-        await _repository.DeleteTournamentAsync(id);
+        await _repository.DeleteAsync(id);
     }
 
     public async Task RegisterPlayerToTournamentAsync(string playerUsername, Guid tournamentId)
     {
-        Tournament? tournament = await _repository.GetTournamentByIdAsync(tournamentId);
+        Tournament? tournament = await _repository.GetByIdAsync(tournamentId);
         if (tournament is null)
             throw new NotFoundException("Impossible de trouver le tournoi.");
         Player? player = await _playerRepository.GetPlayerByUsernameAsync(playerUsername);
@@ -125,7 +125,7 @@ public class TournamentService : ITournamentService
 
     public async Task UnsubscribePlayerFromTournamentAsync(string playerUsername, Guid tournamentId)
     {
-        Tournament? tournament = await _repository.GetTournamentByIdAsync(tournamentId);
+        Tournament? tournament = await _repository.GetByIdAsync(tournamentId);
         if (tournament is null)
             throw new NotFoundException("Impossible de trouver le tournoi.");
         Player? player = await _playerRepository.GetPlayerByUsernameAsync(playerUsername);
@@ -144,7 +144,7 @@ public class TournamentService : ITournamentService
 
     public async Task StartTournamentAsync(Guid tournamentId)
     {
-        Tournament? tournament = await _repository.GetTournamentByIdAsync(tournamentId);
+        Tournament? tournament = await _repository.GetByIdAsync(tournamentId);
         if (tournament is null)
             throw new NotFoundException("Impossible de trouver le tournoi.");
         if (tournament.FinalRegisterDate > DateTime.Now)
@@ -162,7 +162,7 @@ public class TournamentService : ITournamentService
         if (encounter is null)
             throw new NotFoundException("Rencontre introuvable.");
 
-        var tournament = await _repository.GetTournamentByIdAsync(encounter.TournamentId);
+        var tournament = await _repository.GetByIdAsync(encounter.TournamentId);
         if (tournament is null)
             throw new NotFoundException("Tournoi introuvable.");
 
@@ -185,7 +185,7 @@ public class TournamentService : ITournamentService
 
     public async Task NextRoundAsync(Guid tournamentId)
     {
-        Tournament? tournament = await _repository.GetTournamentByIdAsync(tournamentId);
+        Tournament? tournament = await _repository.GetByIdAsync(tournamentId);
         int totalRounds = (tournament.PlayerTournaments.Count - 1) * 2;
         
         if (tournament is null)

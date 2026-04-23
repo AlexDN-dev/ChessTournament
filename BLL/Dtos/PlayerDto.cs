@@ -13,7 +13,18 @@ public record PlayerSummaryDto(Guid Id, string Username);
 public record CreatePlayerDto(
     string Username,
     string Email,
-    string Password,
     DateTime Birthday,
     string Gender,
     int? Elo);
+
+public record LoginPlayerDto(
+    string Username,
+    string Password);
+
+public record LoginDto(
+    string Username,
+    string Role,
+    int Elo,
+    string Token,
+    DateTime ExpirateAt
+);

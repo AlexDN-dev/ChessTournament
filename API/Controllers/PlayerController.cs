@@ -1,6 +1,7 @@
 using API.DTOs;
 using BLL.Dtos;
 using BLL.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -36,16 +37,35 @@ public class PlayerController : ControllerBase
         var input = new CreatePlayerDto(
             request.Username,
             request.Email,
-            request.Password,
             request.Birthday,
             request.Gender,
             request.Elo);
 
-        var player = await _service.CreatePlayerAsync(input);
+        var player = await _service.CreateAsync(input);
 
         return CreatedAtAction(
             nameof(GetPlayerByUsername),
             new { username = player.Username },
             player);
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<LoginDto>> LoginPlayer(LoginPlayerRequest request)
+    {
+        var input = new LoginPlayerDto(
+            request.Username,
+            request.Password
+        );
+
+        var player = await _service.LoginPlayerAsync(input);
+
+        return Ok(player);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("admin")]
+    public IActionResult GetAdminData()
+    {
+        return Ok("Vous êtes bien admin, bienvenue");
     }
 }
