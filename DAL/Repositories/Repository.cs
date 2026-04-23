@@ -14,10 +14,10 @@ public class Repository<T> : IRepository<T> where T : class
         _context = context;
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync()
+    public virtual async Task<IEnumerable<T>> GetAllAsync()
         => await _context.Set<T>().AsNoTracking().ToListAsync();
 
-    public async Task<T?> GetByIdAsync(Guid id)
+    public virtual async Task<T?> GetByIdAsync(Guid id)
         => await _context.Set<T>().FindAsync(id);
 
     public virtual async Task<T> CreateAsync(T entity)

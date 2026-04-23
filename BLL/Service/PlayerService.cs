@@ -1,91 +1,89 @@
 using System.Security.Claims;
 using System.Text;
-using System.Text.RegularExpressions;
 using BLL.Dtos;
 using BLL.Interfaces;
 using BLL.Mappers;
 using DAL.Interfaces;
 using Domain.Constants;
+using Domain.Entities;
 using Domain.Exceptions;
 
 namespace BLL.Service;
 
-public class PlayerService : IPlayerService
+public class PlayerService : BaseService<Player, PlayerDto, CreatePlayerDto>, IPlayerService
 {
-    private readonly IPlayerRepository _repository;
+    private readonly IPlayerRepository _playerRepository;
     private readonly IEmailService _emailService;
     private readonly ITokenService _tokenService;
 
-    public PlayerService(IPlayerRepository repository, IEmailService emailService, ITokenService tokenservice)
+    public PlayerService(IPlayerRepository repository, IEmailService emailService, ITokenService tokenService)
+        : base(repository)
     {
-        _repository = repository;
+        _playerRepository = repository;
         _emailService = emailService;
-        _tokenService = tokenservice;
-    }
-
-    public async Task<IEnumerable<PlayerDto>> GetAllAsync()
-    {
-        var players = await _repository.GetAllAsync();
-        return players.Select(p => p.ToDto());
+        _tokenService = tokenService;
     }
 
     public async Task<PlayerDto> GetPlayerByUsernameAsync(string username)
     {
-        var player = await _repository.GetPlayerByUsernameAsync(username);
+        var player = await _playerRepository.GetPlayerByUsernameAsync(username);
         if (player is null)
             throw new NotFoundException($"Aucun joueur trouvé avec le pseudo '{username}'.");
 
         return player.ToDto();
     }
 
-    public async Task<PlayerDto> CreatePlayerAsync(CreatePlayerDto dto)
+    public override async Task<PlayerDto> CreateAsync(CreatePlayerDto dto)
     {
         if (!PlayerConstants.AllowedGenders.Contains(dto.Gender))
             throw new ValidationException($"Genre invalide. Valeurs autorisées : {string.Join(", ", PlayerConstants.AllowedGenders)}.");
-        
+
         string password = CreatePassword(10);
         var entity = dto.ToEntity(password);
         entity.HashPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
-        var created = await _repository.CreatePlayerAsync(entity);
+        var created = await _repository.CreateAsync(entity);
 
         await _emailService.SendEmailAsync(dto.Email, "Création du compte ChessTournament",
             $@"<h1>Bonjour {entity.Username}, Bienvenue sur ChessTournament !</h1>
                 <p>Voici le mot de passe de ton compte : {password}</p>
                 <p>N'oublie pas de le changer après ta première connexion.</p>
                 <p>Bon jeu à toi !</p>");
-        
+
         return created!.ToDto();
     }
 
     public async Task<LoginDto> LoginPlayerAsync(LoginPlayerDto dto)
     {
-        var player = await _repository.GetPlayerByUsernameAsync(dto.Username);
+        var player = await _playerRepository.GetPlayerByUsernameAsync(dto.Username);
         if (player is null)
             throw new ValidationException("Le nom d'utilisateur ou le mot de passe est incorrecte.");
         if (!BCrypt.Net.BCrypt.Verify(dto.Password, player.HashPassword))
             throw new ValidationException("Le nom d'utilisateur ou le mot de passe est incorrecte.");
 
-        List<Claim> claims = new List<Claim>
-        {
+        List<Claim> claims =
+        [
             new Claim(ClaimTypes.NameIdentifier, player.Id.ToString()),
             new Claim(ClaimTypes.Name, player.Username),
             new Claim(ClaimTypes.Role, player.Role.ToString())
-        };
+        ];
 
         string token = _tokenService.GenerateAccessToken(claims);
         return player.toLoginDto(token);
     }
 
+    protected override PlayerDto ToDto(Player entity) => entity.ToDto();
+
+    protected override Player ToEntity(CreatePlayerDto dto)
+        => throw new NotSupportedException("La création d'un joueur nécéssite un mot de passe.");
+
     private static string CreatePassword(int length)
     {
         const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890&@#{[^{}]";
-        StringBuilder res = new StringBuilder();
-        Random rnd = new Random();
+        var res = new StringBuilder();
+        var rnd = new Random();
         while (0 < length--)
-        {
             res.Append(valid[rnd.Next(valid.Length)]);
-        }
         return res.ToString();
     }
 }

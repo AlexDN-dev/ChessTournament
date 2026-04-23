@@ -2,9 +2,7 @@ using Domain.Entities;
 
 namespace DAL.Interfaces;
 
-public interface IPlayerRepository
+public interface IPlayerRepository : IRepository<Player>
 {
-    Task<IEnumerable<Player>> GetAllAsync();
     Task<Player?> GetPlayerByUsernameAsync(string username);
-    Task<Player?> CreatePlayerAsync(Player p);
 }

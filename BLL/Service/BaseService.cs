@@ -30,7 +30,7 @@ public abstract class BaseService<TEntity, TDto, TCreateDto>
         return ToDto(entity);
     }
 
-    public async Task<TDto> CreateAsync(TCreateDto dto)
+    public virtual async Task<TDto> CreateAsync(TCreateDto dto)
     {
         var entity = ToEntity(dto);
         var created = await _repository.CreateAsync(entity);

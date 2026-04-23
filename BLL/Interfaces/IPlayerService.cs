@@ -2,10 +2,8 @@ using BLL.Dtos;
 
 namespace BLL.Interfaces;
 
-public interface IPlayerService
+public interface IPlayerService : IService<PlayerDto, CreatePlayerDto>
 {
-    Task<IEnumerable<PlayerDto>> GetAllAsync();
     Task<PlayerDto> GetPlayerByUsernameAsync(string username);
-    Task<PlayerDto> CreatePlayerAsync(CreatePlayerDto dto);
     Task<LoginDto> LoginPlayerAsync(LoginPlayerDto dto);
 }

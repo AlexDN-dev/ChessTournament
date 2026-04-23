@@ -8,19 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;
 
-public class PlayerRepository : IPlayerRepository
+public class PlayerRepository : Repository<Player>,IPlayerRepository
 {
-    private readonly ChessTournamentContext _context;
-
-    public PlayerRepository(ChessTournamentContext context)
-    {
-        _context = context;
-    }
-
-    public async Task<IEnumerable<Player>> GetAllAsync()
-    {
-        return await _context.Players.AsNoTracking().ToListAsync();
-    }
+    public PlayerRepository(ChessTournamentContext context) : base(context) {  }
 
     public async Task<Player?> GetPlayerByUsernameAsync(string username)
     {
@@ -28,7 +18,7 @@ public class PlayerRepository : IPlayerRepository
             .FirstOrDefaultAsync(p => p.Username == username);
     }
 
-    public async Task<Player?> CreatePlayerAsync(Player p)
+    public override async Task<Player> CreateAsync(Player p)
     {
         var json = JsonSerializer.Serialize(p);
         var param = new SqlParameter("@Json", json);

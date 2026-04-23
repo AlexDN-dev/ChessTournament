@@ -20,7 +20,7 @@ public class ScoreService : IScoreService
         if (tournamentId == Guid.Empty)
             throw new ValidationException("L'identifiant du tournoi est invalide.");
 
-        var tournament = await _repository.GetTournamentByIdAsync(tournamentId);
+        var tournament = await _repository.GetByIdAsync(tournamentId);
         if (tournament is null)
             throw new NotFoundException($"Aucun tournoi trouvé avec l'identifiant '{tournamentId}'.");
 
