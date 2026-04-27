@@ -41,7 +41,10 @@ public class PlayerController : ControllerBase
             request.Gender,
             request.Elo);
 
-        var player = await _service.CreateAsync(input);
+        // Command : retourne seulement l'Id
+        var id = await _service.CreateAsync(input);
+        // Query : récupère le DTO complet pour la réponse 201
+        var player = await _service.GetByIdAsync(id);
 
         return CreatedAtAction(
             nameof(GetPlayerByUsername),

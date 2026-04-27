@@ -1,12 +1,13 @@
-﻿using BLL.Interfaces;
+using BLL.Interfaces;
 using DAL.Interfaces;
+using Domain.Entities;
 using Domain.Exceptions;
 
 namespace BLL.Service;
 
 public abstract class BaseService<TEntity, TDto, TCreateDto>
     : IService<TDto, TCreateDto>
-    where TEntity : class
+    where TEntity : class, IEntity
 {
     protected readonly IRepository<TEntity> _repository;
 
@@ -30,11 +31,12 @@ public abstract class BaseService<TEntity, TDto, TCreateDto>
         return ToDto(entity);
     }
 
-    public virtual async Task<TDto> CreateAsync(TCreateDto dto)
+    // Command : retourne uniquement l'Id (CQS)
+    public virtual async Task<Guid> CreateAsync(TCreateDto dto)
     {
         var entity = ToEntity(dto);
         var created = await _repository.CreateAsync(entity);
-        return ToDto(created);
+        return created.Id;
     }
 
     public Task DeleteAsync(Guid id)

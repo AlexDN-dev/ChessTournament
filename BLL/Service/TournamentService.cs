@@ -156,6 +156,7 @@ public class TournamentService : ITournamentService
         await _repository.StartTournament(encounterTournaments, tournamentId);
     }
 
+    // Command pur : valide et enregistre le résultat, sans effet de bord supplémentaire
     public async Task UpdateEncounterAsync(Guid encounterId, string result)
     {
         var encounter = await _repository.GetEncounterByIdAsync(encounterId);
@@ -170,17 +171,30 @@ public class TournamentService : ITournamentService
             throw new ValidationException("Seule une rencontre de la round courante peut être modifiée.");
 
         await _repository.UpdateEncounterAsync(encounterId, result);
-        
-        bool roundComplete = tournament.EncounterTournaments
-            .Where(e => e.Round == tournament.ActualRound)
-            .All(e => e.Id == encounterId || e.Result != null);
+    }
 
-        if (roundComplete)
-        {
-            int totalRounds = (tournament.PlayerTournaments.Count - 1) * 2;
-            if (tournament.ActualRound >= totalRounds)
-                await _repository.FinishTournamentAsync(tournament.Id);
-        }
+    // Query pure : recharge depuis la DB (données à jour après l'update)
+    public async Task<bool> IsRoundCompleteAsync(Guid tournamentId)
+    {
+        var tournament = await _repository.GetByIdAsync(tournamentId);
+        if (tournament is null)
+            throw new NotFoundException("Tournoi introuvable.");
+
+        return tournament.EncounterTournaments
+            .Where(e => e.Round == tournament.ActualRound)
+            .All(e => e.Result != null);
+    }
+
+    // Command : termine le tournoi uniquement si c'est bien la dernière ronde
+    public async Task FinishTournamentIfLastRoundAsync(Guid tournamentId)
+    {
+        var tournament = await _repository.GetByIdAsync(tournamentId);
+        if (tournament is null)
+            throw new NotFoundException("Tournoi introuvable.");
+
+        int totalRounds = (tournament.PlayerTournaments.Count - 1) * 2;
+        if (tournament.ActualRound >= totalRounds)
+            await _repository.FinishTournamentAsync(tournamentId);
     }
 
     public async Task NextRoundAsync(Guid tournamentId)

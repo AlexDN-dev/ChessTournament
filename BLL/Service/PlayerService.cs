@@ -33,7 +33,8 @@ public class PlayerService : BaseService<Player, PlayerDto, CreatePlayerDto>, IP
         return player.ToDto();
     }
 
-    public override async Task<PlayerDto> CreateAsync(CreatePlayerDto dto)
+    // Command : retourne uniquement l'Id (CQS)
+    public override async Task<Guid> CreateAsync(CreatePlayerDto dto)
     {
         if (!PlayerConstants.AllowedGenders.Contains(dto.Gender))
             throw new ValidationException($"Genre invalide. Valeurs autorisées : {string.Join(", ", PlayerConstants.AllowedGenders)}.");
@@ -50,7 +51,7 @@ public class PlayerService : BaseService<Player, PlayerDto, CreatePlayerDto>, IP
                 <p>N'oublie pas de le changer après ta première connexion.</p>
                 <p>Bon jeu à toi !</p>");
 
-        return created!.ToDto();
+        return created!.Id;
     }
 
     public async Task<LoginDto> LoginPlayerAsync(LoginPlayerDto dto)

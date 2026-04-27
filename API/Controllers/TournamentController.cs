@@ -92,10 +92,17 @@ public class TournamentController : ControllerBase
     }
 
     [HttpPut("update-encounter")]
-    public async Task<ActionResult> UpdateEncounter(Guid encounterId, string result)
+    public async Task<ActionResult> UpdateEncounter(Guid encounterId, Guid tournamentId, string result)
     {
+        // Command : enregistre le résultat
         await _service.UpdateEncounterAsync(encounterId, result);
-        return Ok("Le resultat de la rencontre a bien été mis à jour.");
+
+        // Query : vérifie si la ronde est terminée (recharge depuis DB, données à jour)
+        if (await _service.IsRoundCompleteAsync(tournamentId))
+            // Command : termine le tournoi si c'est la dernière ronde
+            await _service.FinishTournamentIfLastRoundAsync(tournamentId);
+
+        return Ok("Le résultat de la rencontre a bien été mis à jour.");
     }
 
     [HttpPut("next-round")]
