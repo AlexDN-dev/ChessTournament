@@ -26,9 +26,7 @@ public class CategoryController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CategoryDto>> CreateCategory(CreateCategoryRequest request)
     {
-        // Command : retourne seulement l'Id
         var id = await _service.CreateAsync(new CreateCategoryDto(request.Name, request.MinAge, request.MaxAge));
-        // Query : récupère le DTO complet pour la réponse 201
         var created = await _service.GetByIdAsync(id);
         return CreatedAtAction(nameof(GetAll), new { id = id }, created);
     }

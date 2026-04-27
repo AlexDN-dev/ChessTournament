@@ -33,7 +33,6 @@ public class PlayerService : BaseService<Player, PlayerDto, CreatePlayerDto>, IP
         return player.ToDto();
     }
 
-    // Command : retourne uniquement l'Id (CQS)
     public override async Task<Guid> CreateAsync(CreatePlayerDto dto)
     {
         if (!PlayerConstants.AllowedGenders.Contains(dto.Gender))

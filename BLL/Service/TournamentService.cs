@@ -156,7 +156,6 @@ public class TournamentService : ITournamentService
         await _repository.StartTournament(encounterTournaments, tournamentId);
     }
 
-    // Command pur : valide et enregistre le résultat, sans effet de bord supplémentaire
     public async Task UpdateEncounterAsync(Guid encounterId, string result)
     {
         var encounter = await _repository.GetEncounterByIdAsync(encounterId);
@@ -173,7 +172,6 @@ public class TournamentService : ITournamentService
         await _repository.UpdateEncounterAsync(encounterId, result);
     }
 
-    // Query pure : recharge depuis la DB (données à jour après l'update)
     public async Task<bool> IsRoundCompleteAsync(Guid tournamentId)
     {
         var tournament = await _repository.GetByIdAsync(tournamentId);
@@ -185,7 +183,6 @@ public class TournamentService : ITournamentService
             .All(e => e.Result != null);
     }
 
-    // Command : termine le tournoi uniquement si c'est bien la dernière ronde
     public async Task FinishTournamentIfLastRoundAsync(Guid tournamentId)
     {
         var tournament = await _repository.GetByIdAsync(tournamentId);

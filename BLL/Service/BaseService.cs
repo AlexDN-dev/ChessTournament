@@ -31,7 +31,6 @@ public abstract class BaseService<TEntity, TDto, TCreateDto>
         return ToDto(entity);
     }
 
-    // Command : retourne uniquement l'Id (CQS)
     public virtual async Task<Guid> CreateAsync(TCreateDto dto)
     {
         var entity = ToEntity(dto);
