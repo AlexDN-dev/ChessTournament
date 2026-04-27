@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Domain.Entities;
 
-public class Category
+public class Category : IEntity
 {
     public Guid Id { get; set; }
 

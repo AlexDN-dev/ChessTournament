@@ -4,7 +4,7 @@ using Domain.Enum;
 
 namespace Domain.Entities;
 
-public class Tournament
+public class Tournament : IEntity
 {
     public Guid Id { get; set; }
 

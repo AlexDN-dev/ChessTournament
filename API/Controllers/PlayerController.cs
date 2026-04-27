@@ -41,7 +41,8 @@ public class PlayerController : ControllerBase
             request.Gender,
             request.Elo);
 
-        var player = await _service.CreateAsync(input);
+        var id = await _service.CreateAsync(input);
+        var player = await _service.GetByIdAsync(id);
 
         return CreatedAtAction(
             nameof(GetPlayerByUsername),

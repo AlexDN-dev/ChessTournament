@@ -92,10 +92,14 @@ public class TournamentController : ControllerBase
     }
 
     [HttpPut("update-encounter")]
-    public async Task<ActionResult> UpdateEncounter(Guid encounterId, string result)
+    public async Task<ActionResult> UpdateEncounter(Guid encounterId, Guid tournamentId, string result)
     {
         await _service.UpdateEncounterAsync(encounterId, result);
-        return Ok("Le resultat de la rencontre a bien été mis à jour.");
+
+        if (await _service.IsRoundCompleteAsync(tournamentId))
+            await _service.FinishTournamentIfLastRoundAsync(tournamentId);
+
+        return Ok("Le résultat de la rencontre a bien été mis à jour.");
     }
 
     [HttpPut("next-round")]

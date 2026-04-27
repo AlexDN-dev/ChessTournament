@@ -170,17 +170,28 @@ public class TournamentService : ITournamentService
             throw new ValidationException("Seule une rencontre de la round courante peut être modifiée.");
 
         await _repository.UpdateEncounterAsync(encounterId, result);
-        
-        bool roundComplete = tournament.EncounterTournaments
-            .Where(e => e.Round == tournament.ActualRound)
-            .All(e => e.Id == encounterId || e.Result != null);
+    }
 
-        if (roundComplete)
-        {
-            int totalRounds = (tournament.PlayerTournaments.Count - 1) * 2;
-            if (tournament.ActualRound >= totalRounds)
-                await _repository.FinishTournamentAsync(tournament.Id);
-        }
+    public async Task<bool> IsRoundCompleteAsync(Guid tournamentId)
+    {
+        var tournament = await _repository.GetByIdAsync(tournamentId);
+        if (tournament is null)
+            throw new NotFoundException("Tournoi introuvable.");
+
+        return tournament.EncounterTournaments
+            .Where(e => e.Round == tournament.ActualRound)
+            .All(e => e.Result != null);
+    }
+
+    public async Task FinishTournamentIfLastRoundAsync(Guid tournamentId)
+    {
+        var tournament = await _repository.GetByIdAsync(tournamentId);
+        if (tournament is null)
+            throw new NotFoundException("Tournoi introuvable.");
+
+        int totalRounds = (tournament.PlayerTournaments.Count - 1) * 2;
+        if (tournament.ActualRound >= totalRounds)
+            await _repository.FinishTournamentAsync(tournamentId);
     }
 
     public async Task NextRoundAsync(Guid tournamentId)
